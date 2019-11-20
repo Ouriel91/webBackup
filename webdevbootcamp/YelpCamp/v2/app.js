@@ -1,7 +1,7 @@
 var express     = require("express"),
     app         = express(),
     bodyParser  = require("body-parser"),
-    mongoose    = require("mongoose")
+    mongoose    = require("mongoose");
 
 mongoose.connect("mongodb://localhost:27017/yelp_camp", 
 				 {useUnifiedTopology: true, 
