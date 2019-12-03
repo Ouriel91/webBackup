@@ -163,7 +163,7 @@ Editing Campgrounds
 
 * Random Background Landing Page
 
-* Refactor middleware
+* Refactor middleware 
 
 * change styling in show template - comment delete/update
 
