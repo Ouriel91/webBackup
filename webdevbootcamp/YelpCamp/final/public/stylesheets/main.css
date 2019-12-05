@@ -1,3 +1,16 @@
+
+/* Sticky footer styles
+-------------------------------------------------- */
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  /* Margin bottom by footer height */
+  margin-bottom: 60px;
+}
+
 h1{
 	text-align: center;
 }
@@ -7,10 +20,34 @@ hr{
     background: #333;
     background-image: linear-gradient(to right, #ccc, #333, #ccc);
 }
+
+.footer{
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	/* Set the fixed height of the footer here */
+	height: 60px;
+	background-color: #f5f5f5;
+}
+
+.container .text-muted{
+	margin: 20px 0;
+}
+
+.alert{
+	width: inherit;
+}
+
 .content_style{
 	width: 30%; 
 	margin: 25px auto;
 }
+
+.flex-wrap {
+  display:flex;
+  flex-wrap: wrap;
+}
+
 .desc{
 	text-align: center;
 }
@@ -29,4 +66,11 @@ hr{
 
 .delete-form{
 	display: inline;
+}
+
+
+/* Google Map styles */
+#map {
+	height: 400px;
+	width: 100%;
 }
