@@ -17,13 +17,12 @@ router.get("/", function(req, res){
         const regex = new RegExp(escapeRegex(req.query.search), 'gi');
         // Get all campgrounds from DB
         Campground.find({$or: [{name: regex}, {location: regex}, {"author.username":regex}]}, function(err, allCampgrounds){
-           if(err){
-               console.log(err);
+           if(err || !allCampgrounds.length){
+                req.flash('error', 'No campgrounds matched your search. Please try again.');
+                res.redirect("back");
            } else {
-             if(allCampgrounds.length < 1) {
-                  noMatch = "No campgrounds match that query, please try again.";
-              }
-              res.render("campgrounds/index",{campgrounds:allCampgrounds, noMatch: noMatch});
+             
+              res.render("campgrounds/index",{campgrounds:allCampgrounds});
            }
         });
     }
@@ -33,7 +32,7 @@ router.get("/", function(req, res){
 		   if(err){
 			   console.log(err);
 		   } else {
-			  res.render("campgrounds/index",{campgrounds:allCampgrounds, page:"campgrounds" , noMatch: noMatch});
+			  res.render("campgrounds/index",{campgrounds:allCampgrounds, page:"campgrounds"});
 		   }
 		});
 	}
