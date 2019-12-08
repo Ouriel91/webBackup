@@ -1,3 +1,6 @@
+// configure dotenv
+require('dotenv').config();
+
 var express     	= require("express"),
     app         	= express(),
     bodyParser  	= require("body-parser"),
@@ -10,6 +13,7 @@ var express     	= require("express"),
 	Comment 		= require("./models/comment"),
 	seedDB			= require("./seeds"),
 	User			= require("./models/user");
+
 
 //requiring routes
 var commentsRoutes 		= require("./routes/comments"),

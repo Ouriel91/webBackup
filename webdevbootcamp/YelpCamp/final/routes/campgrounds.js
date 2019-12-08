@@ -4,6 +4,17 @@ var Campground	= require("../models/campground");
 var Comment		= require("../models/comment");
 var middleware	= require("../middleware");
 
+var NodeGeocoder = require('node-geocoder');
+ 
+var options = {
+  provider: 'google',
+  httpAdapter: 'https',
+  apiKey: process.env.GEOCODER_API_KEY,
+  formatter: null
+};
+ 
+var geocoder = NodeGeocoder(options);
+
 // Define escapeRegex function for search feature
 function escapeRegex(text) {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
@@ -12,10 +23,9 @@ function escapeRegex(text) {
 //INDEX - show all campgrounds
 router.get("/", function(req, res){
 	
-	var noMatch = null;
     if(req.query.search) {
         const regex = new RegExp(escapeRegex(req.query.search), 'gi');
-        // Get all campgrounds from DB
+        // Get all campgrounds from DB by search
         Campground.find({$or: [{name: regex}, {location: regex}, {"author.username":regex}]}, function(err, allCampgrounds){
            if(err || !allCampgrounds.length){
                 req.flash('error', 'No campgrounds matched your search. Please try again.');
@@ -50,18 +60,33 @@ router.post("/", middleware.isLoggedIn,function(req, res){
 		id: req.user._id,
 		username: req.user.username
 	};
-    var newCampground = {name: name, cost:cost, image: image, description: desc, author:author}
-    // Create a new campground and save to DB
-    Campground.create(newCampground, function(err, newlyCreated){
-        if(err){
+	
+	geocoder.geocode(req.body.location, function (err, data) {
+		
+		if (err || !data.length) {
 			console.log(err);
-			req.flash("error", "Something went wrong");
-        } else {
-            //redirect back to campgrounds page
-			req.flash("success", "Successfully added Campground");
-            res.redirect("/campgrounds");
-        }
-    });
+			req.flash('error', 'Invalid address');
+			return res.redirect('back');
+		}
+		
+		var lat = data[0].latitude; //
+		var lng = data[0].longitude; //
+		var location = data[0].formattedAddress;
+		
+		var newCampground = {name: name, cost:cost, image: image, description: desc, author:author, 
+							 location:location, lat:lat, lng:lng};
+		// Create a new campground and save to DB
+		Campground.create(newCampground, function(err, newlyCreated){
+			if(err){
+				console.log(err);
+				req.flash("error", "Something went wrong");
+			} else {
+				//redirect back to campgrounds page
+				req.flash("success", "Successfully added Campground");
+				res.redirect("/campgrounds");
+			}
+		});
+	});
 });
 
 //NEW - show form to create new campground
@@ -96,19 +121,25 @@ router.get("/:id/edit", middleware.checkCampgroundOwnership ,function(req, res){
 //UPDATE - update campground route
 router.put("/:id", middleware.checkCampgroundOwnership,function(req, res){
 	
-var newData = {name: req.body.name, image: req.body.image, cost: req.body.cost, description: req.body.description};	
-//find and update the correct route
-Campground.findByIdAndUpdate(req.params.id, {$set:newData}, function(err,updatedCampground){
-		
-		if(err){
-			console.log(err);
-			res.redirect("/campgrounds", {"error":err.message});
-		} else{
-			//redirect to show page
-			req.flash("success", "Successfully updated Campground");
-			res.redirect("/campgrounds/" + req.params.id);
-		}
-	});	
+	geocoder.geocode(req.body.location, function(err, data){
+		var lat = data[0].latitude;
+		var lng = data[0].longitude;
+		var location = data[0].formattedAddress;
+		var newData = {name: req.body.name, image: req.body.image, cost: req.body.cost, description: req.body.description,
+				  location: location, lat: lat, lng: lng};	
+		//find and update the correct route
+		Campground.findByIdAndUpdate(req.params.id, {$set:newData}, function(err,updatedCampground){
+
+				if(err){
+					console.log(err);
+					res.redirect("/campgrounds", {"error":err.message});
+				} else{
+					//redirect to show page
+					req.flash("success", "Successfully updated Campground");
+					res.redirect("/campgrounds/" + updatedCampground._id);
+				}
+			});	
+	});
 });
 
 //DESTROY / DELETE- destroy campground route
