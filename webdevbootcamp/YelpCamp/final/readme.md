@@ -175,6 +175,24 @@ Editing Campgrounds
 * Install and configure connect-flash
 * Add bootstrap alerts to header
 
+final version
+======================================
+
+#UI Improvments
+* change login and sign in forms
+* adding footer
+* hr between comments
+* navbar change
+* hamburger button
+* background slider in landing page
+
+#Featurs
+* Dynamic price
+* map feature
+* fuzzy search
+* forms with cost and place fields
+* require fields in forms
+
 RESTFUL ROUTES
 
 name      url      verb    desc.

@@ -4,16 +4,40 @@ var Campground	= require("../models/campground");
 var Comment		= require("../models/comment");
 var middleware	= require("../middleware");
 
+// Define escapeRegex function for search feature
+function escapeRegex(text) {
+    return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+};
+
 //INDEX - show all campgrounds
 router.get("/", function(req, res){
-    // Get all campgrounds from DB
-    Campground.find({}, function(err, allCampgrounds){
-       if(err){
-           console.log(err);
-       } else {
-          res.render("campgrounds/index",{campgrounds:allCampgrounds, page:"campgrounds"});
-       }
-    });
+	
+	var noMatch = null;
+    if(req.query.search) {
+        const regex = new RegExp(escapeRegex(req.query.search), 'gi');
+        // Get all campgrounds from DB
+        Campground.find({$or: [{name: regex}, {location: regex}, {"author.username":regex}]}, function(err, allCampgrounds){
+           if(err){
+               console.log(err);
+           } else {
+             if(allCampgrounds.length < 1) {
+                  noMatch = "No campgrounds match that query, please try again.";
+              }
+              res.render("campgrounds/index",{campgrounds:allCampgrounds, noMatch: noMatch});
+           }
+        });
+    }
+	else{
+		// Get all campgrounds from DB
+		Campground.find({}, function(err, allCampgrounds){
+		   if(err){
+			   console.log(err);
+		   } else {
+			  res.render("campgrounds/index",{campgrounds:allCampgrounds, page:"campgrounds" , noMatch: noMatch});
+		   }
+		});
+	}
+    
 });
 
 //CREATE - add new campground to DB
@@ -108,5 +132,9 @@ router.delete("/:id", middleware.checkCampgroundOwnership, function(req, res){
     });
 });
 
+
+function escapeRegex(text) {
+    return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+};
 
 module.exports = router;
