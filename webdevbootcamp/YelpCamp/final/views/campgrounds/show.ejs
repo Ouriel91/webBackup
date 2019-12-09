@@ -17,10 +17,12 @@
 					<h4><a><%=campground.name%></a></h4>
 					<p><%= campground.description %></p>
 					<p>
-						<em>Submitted by: <%= campground.author.username %></em>
+						<em>
+							Submitted by: <%= campground.author.username %> , <%= moment(campground.createdAt).fromNow() %>
+						</em>
 					</p>
 					
-					<% if(currentUser && campground.author.id.equals(currentUser._id)){ %>
+					<% if(currentUser && campground.author.id.equals(currentUser._id) || currentUser.isAdmin){ %>
 						<a class="btn btn-xs btn-warning" href="/campgrounds/<%= campground._id %>/edit">Edit</a>
 						<form class="delete-form" action="/campgrounds/<%= campground._id %>?_method=DELETE" method="POST">
 							<button class="btn btn-xs btn-danger">
@@ -39,11 +41,11 @@
 					<div class="row">
 						<div class="col-md-12">
 							<strong><%= comment.author.username %></strong>
-							<span class="pull-right">10 Days ago</span>
+							<span class="pull-right"><%= moment(comment.createdAt).fromNow() %></span>
 							<p>
 								<%= comment.text %>
 							</p>
-							<% if(currentUser && comment.author.id.equals(currentUser._id)){ %>
+							<% if(currentUser && comment.author.id.equals(currentUser._id) || currentUser.isAdmin){ %>
 								<a class="btn btn-xs btn-warning" 
 								   href="/campgrounds/<%=campground._id %>/comments/<%= comment._id %>/edit">
 									Edit
@@ -74,7 +76,7 @@
         scrollwheel: true
     });
     var contentString = `
-      <strong><%= campground.name %><br />
+      <strong><em><%= campground.name %></em>,<br />
       <%= campground.location %></strong>
       <p><%= campground.description %></p>
     `

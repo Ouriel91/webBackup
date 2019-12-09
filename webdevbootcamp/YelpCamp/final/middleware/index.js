@@ -13,8 +13,8 @@ middlewareObj.checkCampgroundOwnership = function checkCampgroundOwnership(req, 
 				res.redirect("back");
 			} else{
 				 
-				//it's the user campground?
-				if(foundCampground.author.id.equals(req.user._id)){ 
+				//it's the user campground? user is admin?
+				if(foundCampground.author.id.equals(req.user._id) || req.user.isAdmin){ 
 					//no === here because foundCampground.author.id is object while req.user._id is a string, 
 					//we use in equals method of mongoose
 					next();
@@ -42,8 +42,8 @@ middlewareObj.checkCommentOwnership = function checkCommentOwnership(req, res, n
 				res.redirect("back");
 			} else{
 				 
-				//it's the user comment?
-				if(foundComment.author.id.equals(req.user._id)){ 
+				//it's the user comment? user is admin?
+				if(foundComment.author.id.equals(req.user._id) || req.user.isAdmin){ 
 					//no === here because foundCampground.author.id is object while req.user._id is a string, 
 					//we use in equals method of mongoose
 					next();
