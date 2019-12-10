@@ -1,8 +1,10 @@
-var express 	= require("express");
-var router		= express.Router();
-var Campground	= require("../models/campground");
-var Comment		= require("../models/comment");
-var middleware	= require("../middleware");
+const express 	= require("express");
+const router		= express.Router();
+const Campground	= require("../models/campground");
+const Comment		= require("../models/comment");
+const middleware	= require("../middleware");
+//need to add isSafe
+const { isLoggedIn, checkUserCampground, checkUserComment, isAdmin ,isSafe } = middleware; // destructuring assignment
 
 var NodeGeocoder = require('node-geocoder');
  
@@ -50,7 +52,7 @@ router.get("/", function(req, res){
 });
 
 //CREATE - add new campground to DB
-router.post("/", middleware.isLoggedIn,function(req, res){
+router.post("/", isLoggedIn, isSafe, function(req, res){
     // get data from form and add to campgrounds array
     var name = req.body.name;
 	var cost = req.body.cost;
@@ -90,7 +92,7 @@ router.post("/", middleware.isLoggedIn,function(req, res){
 });
 
 //NEW - show form to create new campground
-router.get("/new",middleware.isLoggedIn, function(req, res){
+router.get("/new",isLoggedIn, function(req, res){
    res.render("campgrounds/new"); 
 });
 
@@ -99,8 +101,10 @@ router.get("/:id", function(req, res){
     //find the campground with provided ID
     Campground.findById(req.params.id).populate("comments").exec(function(err, foundCampground){
         if(err || !foundCampground){//!foundCampground means that campground is null
-            req.flash("error", "Campground not found");
-			res.redirect("back");
+			
+            console.log(err);
+            req.flash('error', 'Sorry, that campground does not exist!');
+            return res.redirect('/campgrounds');
         } else {
 			//console.log(foundCampground);
             //render show template with that campground
@@ -110,16 +114,14 @@ router.get("/:id", function(req, res){
 });
 
 //EDIT - edit campground route
-router.get("/:id/edit", middleware.checkCampgroundOwnership ,function(req, res){
+router.get("/:id/edit", isLoggedIn, checkUserCampground ,function(req, res){
 	
-		Campground.findById(req.params.id, function(err,foundCampground){	
-			
-			res.render("campgrounds/edit", {campground: foundCampground});	
-		});	
+	res.render("campgrounds/edit", {campground: req.campground});	
+		
 });
 
 //UPDATE - update campground route
-router.put("/:id", middleware.checkCampgroundOwnership,function(req, res){
+router.put("/:id", isSafe ,function(req, res){
 	
 	geocoder.geocode(req.body.location, function(err, data){
 		var lat = data[0].latitude;
@@ -143,23 +145,26 @@ router.put("/:id", middleware.checkCampgroundOwnership,function(req, res){
 });
 
 //DESTROY / DELETE- destroy campground route
-router.delete("/:id", middleware.checkCampgroundOwnership, function(req, res){
-	Campground.findByIdAndRemove(req.params.id, function(err, campgroundRemoved) {
-		
-        if (err) {
-			console.log(err);
-			res.redirect("/campgrounds", {"error":err.message});
-        }
-		
-		//delete comments from DB
-        Comment.deleteMany( {_id: { $in: campgroundRemoved.comments } }, function(err) {
-            if (err) {
-                console.log(err);
+router.delete("/:id", isLoggedIn, checkUserCampground, function(req, res){
+	Comment.deleteMany({
+      _id: {
+        $in: req.campground.comments
+      }
+    }, function(err) {
+      if(err) {
+          req.flash('error', err.message);
+          res.redirect('/');
+      } else {
+          req.campground.remove(function(err) {
+            if(err) {
+                req.flash('error', err.message);
+                return res.redirect('/');
             }
-			req.flash("success", "Successfully deleted Campground");
-            res.redirect("/campgrounds");
-        });	
-    });
+            req.flash('error', 'Campground deleted!');
+            res.redirect('/campgrounds');
+          });
+      }
+    })
 });
 
 
