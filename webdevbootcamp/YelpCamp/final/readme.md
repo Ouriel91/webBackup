@@ -188,13 +188,14 @@ final version
 * centering search line
 
 #Featurs
-* Dynamic price
+* dynamic price
 * map feature
 * fuzzy search
 * isAdmin options
 * refactoring middleware
 * forms with cost and place fields
 * require fields in forms
+* profile feature
 
 RESTFUL ROUTES
 
