@@ -185,11 +185,14 @@ final version
 * navbar change
 * hamburger button
 * background slider in landing page
+* centering search line
 
 #Featurs
 * Dynamic price
 * map feature
 * fuzzy search
+* isAdmin options
+* refactoring middleware
 * forms with cost and place fields
 * require fields in forms
 
