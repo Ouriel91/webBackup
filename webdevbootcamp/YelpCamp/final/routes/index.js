@@ -4,6 +4,8 @@ var passport	= require("passport");
 var User		= require("../models/user");
 var Campground	= require("../models/campground");
 
+const secretCode = process.env.SECRET_CODE
+
 //root route
 router.get("/", function(req, res){
     res.render("landing");
@@ -31,7 +33,7 @@ router.post("/register", function(req, res){
 		}
 	);
 	
-	if(req.body.adminCode === 'secretCode123'){
+	if(req.body.adminCode === secretCode){
 		newUser.isAdmin = true;
 	}
 	
