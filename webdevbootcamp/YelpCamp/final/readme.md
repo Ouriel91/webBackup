@@ -196,6 +196,7 @@ final version
 * forms with cost and place fields
 * require fields in forms
 * profile feature
+* reset password
 
 RESTFUL ROUTES
 
